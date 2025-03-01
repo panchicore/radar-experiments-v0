@@ -1,0 +1,118 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "description": "Zona segura - Campus universitario",
+        "level": 10
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.802875, 11.016741]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "description": "Zona peligrosa - Cruce transitado",
+        "level": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.825232, 10.989234]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "description": "Zona neutra - Centro comercial",
+        "level": 5
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.812739, 11.007549]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "description": "Zona segura - Parque residencial",
+        "level": 9
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.797918, 10.984726]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "description": "Zona de precaución - Avenida principal",
+        "level": 3
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.814284, 10.979456]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "description": "Área residencial - Nivel bajo de incidentes",
+        "level": 9
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-74.795129, 10.998237],
+            [-74.789292, 10.996942],
+            [-74.787361, 10.990023],
+            [-74.792639, 10.988728],
+            [-74.795129, 10.998237]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "description": "Sector comercial - Nivel intermedio",
+        "level": 5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-74.815235, 11.003507],
+            [-74.810772, 11.006097],
+            [-74.807853, 11.002211],
+            [-74.812745, 10.999621],
+            [-74.815235, 11.003507]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "description": "Zona industrial - Alto riesgo",
+        "level": 2
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-74.834204, 10.988728],
+            [-74.828796, 10.990023],
+            [-74.826992, 10.982454],
+            [-74.832400, 10.981159],
+            [-74.834204, 10.988728]
+          ]
+        ]
+      }
+    
+    }
+  ]
+}

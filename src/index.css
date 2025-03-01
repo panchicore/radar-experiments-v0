@@ -1,0 +1,96 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+#map {
+    width: 100%;
+    height: 100vh;
+}
+
+.control-panel {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+    background: white;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    max-width: 300px;
+}
+
+.control-panel h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.control-panel label {
+    display: block;
+    margin-top: 10px;
+}
+
+.control-panel input {
+    width: 100%;
+    margin-top: 5px;
+    padding: 5px;
+    box-sizing: border-box;
+}
+
+.control-panel button {
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.control-panel button:hover {
+    background: #45a049;
+}
+
+.control-panel #coordinates-display {
+    margin-top: 10px;
+    font-size: 0.9em;
+    color: #666;
+}
+
+.legend {
+    position: absolute;
+    bottom: 30px;
+    right: 10px;
+    z-index: 1000;
+    background: white;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}
+
+.legend-item {
+    margin: 5px 0;
+    display: flex;
+    align-items: center;
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    border-radius: 3px;
+}
+
+.center-marker {
+    z-index: 1001;
+}
+
+.empty-sector {
+    stroke-dasharray: 2, 2;
+}
+
+.filled-sector {
+    /* Additional styling for filled sectors */
+}

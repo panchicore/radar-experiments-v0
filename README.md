@@ -2,8 +2,6 @@
 
 A dynamic, interactive safety and security radar visualization tool that displays geographic safety levels on a map. This project helps users understand the safety landscape around specific locations by analyzing points of interest and representing their safety and security levels in a radar-like interface.
 
-![Safety & Security Radar Demo](https://i.ibb.co/mGQtWxm/security-radar-demo.png)
-
 ## Motivation of this poc
 
 [![DALL-E-2025-03-02-10-38-29-A-first-person-perspective-POV-from-a-high-tech-scouter-helmet-in-a-f.webp](https://i.postimg.cc/4x9RVJhy/DALL-E-2025-03-02-10-38-29-A-first-person-perspective-POV-from-a-high-tech-scouter-helmet-in-a-f.webp)](https://postimg.cc/pmRStMCM)

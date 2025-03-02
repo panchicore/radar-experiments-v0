@@ -1,5 +1,11 @@
-// Inicializar mapa en Barranquilla
-const map = L.map('map').setView([10.99654, -74.81899], 14);
+// Inicializar mapa en Barranquilla with modified zoom behavior
+const map = L.map('map', {
+  scrollWheelZoom: 'center', // Keep the center fixed during mousewheel zoom
+  doubleClickZoom: 'center', // Keep the center fixed during double-click zoom
+  touchZoom: 'center', // Keep the center fixed during touch zoom
+  zoomDelta: 1,
+  zoomSnap: 0.5
+}).setView([10.99654, -74.81899], 14);
 
 // Añadir capa base de OpenStreetMap
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -14,6 +20,8 @@ let pointsOfInterest = [];
 let geojsonLayer = null;
 let poisVisible = true; // Estado de visibilidad de los POIs
 let distanceLabels = []; // Para almacenar referencias a las etiquetas de distancia
+let followingMapCenter = true; // Nueva variable para controlar si el radar sigue el centro del mapa
+let centerCircleMarker = null; // New variable for circle marker
 
 // Configuración inicial
 const config = {
@@ -88,57 +96,83 @@ function destinationPoint(startLatLng, distance, angle) {
   );
 }
 
-// Agregar marcador central
-function addCenterMarker() {
+// Agregar función para actualizar posición del radar cuando el mapa se mueve
+function updateRadarPosition() {
+  // Get current map center
+  const mapCenter = map.getCenter();
+  
+  // Update configuration coordinates
+  config.centerCoords = [mapCenter.lat, mapCenter.lng];
+  config.centerCoordsGeoJSON = [mapCenter.lng, mapCenter.lat];
+  
+  // Remove any existing markers
   if (centerMarker) {
+    if (centerMarker.getTooltip()) {
+      centerMarker.closeTooltip();
+    }
     map.removeLayer(centerMarker);
+    centerMarker = null;
   }
-
-  // Crear un icono personalizado más visible para el marcador central
-  const centerIcon = L.divIcon({
-    className: 'center-radar-marker',
-    html: '<div style="width:24px;height:24px;border-radius:12px;background-color:rgba(255,0,0,0.6);border:3px solid white;box-shadow:0 0 10px rgba(0,0,0,0.5);cursor:move;display:flex;justify-content:center;align-items:center;font-weight:bold;color:white;font-size:14px;">+</div>',
-    iconSize: [30, 30],
-    iconAnchor: [15, 15]
+  
+  // Remove any existing circle marker and its plus symbol
+  if (centerCircleMarker) {
+    if (centerCircleMarker.getTooltip()) {
+      centerCircleMarker.closeTooltip();
+    }
+    
+    // Remove the plus symbol if it exists
+    if (centerCircleMarker._plusSymbol && centerCircleMarker._plusSymbol.parentNode) {
+      centerCircleMarker._plusSymbol.parentNode.removeChild(centerCircleMarker._plusSymbol);
+    }
+    
+    map.removeLayer(centerCircleMarker);
+    centerCircleMarker = null;
+  }
+  
+  // Clean up any ghost elements
+  document.querySelectorAll('.center-radar-marker, .clean-center-marker, .center-plus-symbol').forEach(el => {
+    if (el.parentNode) {
+      el.parentNode.removeChild(el);
+    }
   });
-
-  centerMarker = L.marker(config.centerCoords, {
-    draggable: true,
-    title: "Arrastrar para mover el centro del radar",
-    icon: centerIcon
+  
+  // Create a simpler circle marker without the plus symbol since we have the fixed crosshair
+  centerCircleMarker = L.circleMarker(mapCenter, {
+    radius: 4,
+    color: 'white',
+    weight: 2,
+    fillColor: 'black',
+    fillOpacity: 0.8,
+    pane: 'markerPane'
   }).addTo(map);
-
-  // Añadir información sobre la funcionalidad
-  centerMarker.bindTooltip("Arrastrar para mover el radar", {
+  
+  // Add tooltip
+  centerCircleMarker.bindTooltip("El radar se mueve con el mapa", {
     permanent: false,
     direction: "top",
-    offset: [0, -10]
+    offset: [0, -5]
   });
-
-  // Actualizar coordenadas cuando se arrastra el marcador
-  centerMarker.on('dragend', function(event) {
-    const marker = event.target;
-    const position = marker.getLatLng();
-    config.centerCoords = [position.lat, position.lng];
-    config.centerCoordsGeoJSON = [position.lng, position.lat];
-
-    // Actualizar display de coordenadas
-    document.getElementById('coordinates-display').innerHTML =
-      `Posición: ${position.lat.toFixed(5)}, ${position.lng.toFixed(5)}`;
-
-    // Actualizar etiquetas de distancia
-    updateDistanceLabels();
-    
-    // Actualizar radar
-    updateRadar();
-    
-    // Mostrar notificación de actualización
-    showNotification("Centro del radar actualizado");
-  });
-
-  // Mostrar coordenadas iniciales
+  
+  // Update coordinates display
   document.getElementById('coordinates-display').innerHTML =
-    `Posición: ${config.centerCoords[0].toFixed(5)}, ${config.centerCoords[1].toFixed(5)}`;
+    `Posición: ${mapCenter.lat.toFixed(5)}, ${mapCenter.lng.toFixed(5)}`;
+  
+  // Update distance labels and radar
+  updateDistanceLabels();
+  updateRadar();
+}
+
+// Función debounce para eventos de mapa
+function debounceMapEvent(func, wait) {
+  let timeout;
+  return function() {
+    const context = this;
+    const args = arguments;
+    clearTimeout(timeout);
+    timeout = setTimeout(function() {
+      func.apply(context, args);
+    }, wait);
+  };
 }
 
 // Función para mostrar notificación temporal
@@ -1132,6 +1166,12 @@ function initApp() {
   document.getElementById('radius-input').value = config.radiusMeters;
   document.getElementById('sectors-input').value = config.numSectors;
 
+  // Agregar estilos para limpiar completamente marcadores
+  addCleanMarkerStyles();
+  
+  // Add fixed center crosshair overlay
+  addFixedCenterCrosshair();
+  
   // Agregar elementos al mapa
   addCenterMarker();
   addSamplePOIs();
@@ -1152,6 +1192,47 @@ function initApp() {
   // Actualizaciones automáticas al cambiar inputs
   document.getElementById('radius-input').addEventListener('input', debounce(updateRadar, 300));
   document.getElementById('sectors-input').addEventListener('input', debounce(updateRadar, 300));
+  
+  // Event listener for map movement
+  map.on('moveend', debounceMapEvent(updateRadarPosition, 200));
+
+  // Add event listener for zoom events to ensure the radar stays centered
+  map.on('zoomstart', function(e) {
+    // Store current center before zoom
+    map._lastCenter = map.getCenter();
+  });
+
+  map.on('zoomend', function(e) {
+    // Check if center has changed during zoom
+    const currentCenter = map.getCenter();
+    const lastCenter = map._lastCenter;
+    
+    if (lastCenter && (currentCenter.lat !== lastCenter.lat || currentCenter.lng !== lastCenter.lng)) {
+      // Reset to last center if it changed
+      map.setView(lastCenter, map.getZoom(), {animate: false});
+      
+      // Update radar immediately after correcting the center
+      updateRadarPosition();
+    }
+    
+    // Reposition plus symbol after zoom
+    if (centerCircleMarker && centerCircleMarker._plusSymbol) {
+      const markerCenter = map.latLngToLayerPoint(centerCircleMarker.getLatLng());
+      L.DomUtil.setPosition(centerCircleMarker._plusSymbol, markerCenter);
+    }
+  });
+
+  // Add additional handler for box zoom
+  map.on('boxzoomend', function(e) {
+    // After box zoom, center the map on the radar center
+    const mapCenter = map.getCenter();
+    
+    // Check if radar center matches map center
+    if (config.centerCoords[0] !== mapCenter.lat || config.centerCoords[1] !== mapCenter.lng) {
+      // Update radar position to match new center
+      updateRadarPosition();
+    }
+  });
 
   // Añadir estilos CSS para etiquetas de distancia
   addDistanceLabelStyles();
@@ -1184,4 +1265,165 @@ function getStrokeColor(level) {
   };
 
   return colorMap[safeLevel];
+}
+
+// Añadir estilos CSS para limpiar completamente cualquier rastro de marcadores
+function addCleanMarkerStyles() {
+  const style = document.createElement('style');
+  style.innerHTML = `
+    /* Remove all traces of old markers */
+    .leaflet-marker-pane .center-radar-marker,
+    .leaflet-marker-pane .clean-center-marker {
+      display: none !important;
+    }
+    
+    /* Make circle marker smooth */
+    .leaflet-interactive {
+      outline: none !important;
+    }
+    
+    /* Center plus symbol */
+    .center-plus-symbol {
+      z-index: 1000;
+      pointer-events: none;
+    }
+    
+    /* Fixed center crosshair */
+    #map-center-crosshair {
+      /* Animation for better visibility during map operations */
+      transition: opacity 0.2s ease-in-out;
+    }
+    
+    /* Make crosshair more visible when the map is moving */
+    .leaflet-container.leaflet-drag-target #map-center-crosshair,
+    .leaflet-container.leaflet-zoom-anim #map-center-crosshair {
+      opacity: 0.9;
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+// Agregar marcador central
+function addCenterMarker() {
+  // Remove any existing markers
+  if (centerMarker) {
+    if (centerMarker.getTooltip()) {
+      centerMarker.closeTooltip();
+    }
+    map.removeLayer(centerMarker);
+    centerMarker = null;
+  }
+  
+  // Remove any existing circle marker and its plus symbol
+  if (centerCircleMarker) {
+    if (centerCircleMarker.getTooltip()) {
+      centerCircleMarker.closeTooltip();
+    }
+    
+    // Remove the plus symbol if it exists
+    if (centerCircleMarker._plusSymbol && centerCircleMarker._plusSymbol.parentNode) {
+      centerCircleMarker._plusSymbol.parentNode.removeChild(centerCircleMarker._plusSymbol);
+    }
+    
+    map.removeLayer(centerCircleMarker);
+    centerCircleMarker = null;
+  }
+  
+  // Clean up any ghost elements
+  document.querySelectorAll('.center-radar-marker, .clean-center-marker, .center-plus-symbol').forEach(el => {
+    if (el.parentNode) {
+      el.parentNode.removeChild(el);
+    }
+  });
+
+  // Get current map center
+  const mapCenter = map.getCenter();
+  config.centerCoords = [mapCenter.lat, mapCenter.lng];
+  config.centerCoordsGeoJSON = [mapCenter.lng, mapCenter.lat];
+
+  // Create a simpler circle marker without the plus symbol since we have the fixed crosshair
+  centerCircleMarker = L.circleMarker(mapCenter, {
+    radius: 4,
+    color: 'white',
+    weight: 2,
+    fillColor: 'black',
+    fillOpacity: 0.8,
+    pane: 'markerPane'
+  }).addTo(map);
+  
+  // Add tooltip
+  centerCircleMarker.bindTooltip("El radar se mueve con el mapa", {
+    permanent: false,
+    direction: "top",
+    offset: [0, -5]
+  });
+  
+  // Update coordinates display
+  document.getElementById('coordinates-display').innerHTML =
+    `Posición: ${config.centerCoords[0].toFixed(5)}, ${config.centerCoords[1].toFixed(5)}`;
+}
+
+// Add a fixed crosshair to the center of the map container
+function addFixedCenterCrosshair() {
+  // Create the crosshair container
+  const crosshair = document.createElement('div');
+  crosshair.id = 'map-center-crosshair';
+  crosshair.style.cssText = `
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    pointer-events: none;
+    width: 20px;
+    height: 20px;
+  `;
+  
+  // Create the horizontal line
+  const horizontalLine = document.createElement('div');
+  horizontalLine.style.cssText = `
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: rgba(0,0,0,0.7);
+    transform: translateY(-50%);
+  `;
+  
+  // Create the vertical line
+  const verticalLine = document.createElement('div');
+  verticalLine.style.cssText = `
+    position: absolute;
+    top: 0;
+    left: 50%;
+    height: 100%;
+    width: 2px;
+    background-color: rgba(0,0,0,0.7);
+    transform: translateX(-50%);
+  `;
+  
+  // Create the center dot
+  const centerDot = document.createElement('div');
+  centerDot.style.cssText = `
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 6px;
+    height: 6px;
+    background-color: white;
+    border: 2px solid black;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+  `;
+  
+  // Add the elements to the crosshair container
+  crosshair.appendChild(horizontalLine);
+  crosshair.appendChild(verticalLine);
+  crosshair.appendChild(centerDot);
+  
+  // Add the crosshair to the map container
+  document.querySelector('.leaflet-container').appendChild(crosshair);
+  
+  return crosshair;
 }

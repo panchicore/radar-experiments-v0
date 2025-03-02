@@ -11,7 +11,7 @@ A dynamic, interactive security radar visualization tool that displays geographi
 - **POI Management**: Add, view, and hide points of interest on the map
 - **GeoJSON Support**: Import security data from GeoJSON files
 - **Distance Indicators**: See the distance from the center to each POI
-- **Draggable Center**: Reposition the radar to analyze different locations
+- **Centered Map Navigation**: The radar stays centered as you navigate the map
 - **Sector Analysis**: Each sector displays the security level based on contained POIs
 - **Visual Color Coding**: Security levels are color-coded from red (dangerous) to green (safe)
 
@@ -48,8 +48,9 @@ No build process is required as this is a client-side JavaScript application.
    - Hover over sectors to see security level details
    - Color coding indicates security levels (red=dangerous, yellow=neutral, green=safe)
 
-5. **Reposition Radar**:
-   - Drag the center marker to analyze different locations
+5. **Navigate the Map**:
+   - Pan and zoom the map to analyze different locations
+   - The radar will always stay centered on your current view
 
 6. **Toggle POI Visibility**:
    - Use the "Ocultar POIs" button to hide or show markers

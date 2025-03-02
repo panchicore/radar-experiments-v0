@@ -1,19 +1,19 @@
-# Security Radar Visualization
+# Safety & Security Radar Visualization
 
-A dynamic, interactive security radar visualization tool that displays geographic security levels on a map. This project helps users understand the security landscape around specific locations by analyzing points of interest and representing their security levels in a radar-like interface.
+A dynamic, interactive safety and security radar visualization tool that displays geographic safety levels on a map. This project helps users understand the safety landscape around specific locations by analyzing points of interest and representing their safety and security levels in a radar-like interface.
 
-![Security Radar Demo](https://i.ibb.co/mGQtWxm/security-radar-demo.png)
+![Safety & Security Radar Demo](https://i.ibb.co/mGQtWxm/security-radar-demo.png)
 
 ## Features
 
-- **Interactive Radar Visualization**: View security levels in different directions around a central point
+- **Interactive Radar Visualization**: View safety and security levels in different directions around a central point
 - **Adjustable Parameters**: Change radar radius and number of sectors on-the-fly
 - **POI Management**: Add, view, and hide points of interest on the map
-- **GeoJSON Support**: Import security data from GeoJSON files
+- **GeoJSON Support**: Import safety data from GeoJSON files
 - **Distance Indicators**: See the distance from the center to each POI
 - **Centered Map Navigation**: The radar stays centered as you navigate the map
-- **Sector Analysis**: Each sector displays the security level based on contained POIs
-- **Visual Color Coding**: Security levels are color-coded from red (dangerous) to green (safe)
+- **Sector Analysis**: Each sector displays the safety level based on contained POIs
+- **Visual Color Coding**: Safety levels are color-coded from red (dangerous) to green (safe)
 
 ## Installation
 
@@ -38,15 +38,15 @@ No build process is required as this is a client-side JavaScript application.
 
 2. **Add Points of Interest**:
    - Click "Agregar Punto de Interés" to add custom POIs
-   - Specify security level (1-10) and description
+   - Specify safety level (1-10) and description
 
 3. **Import GeoJSON Data**:
-   - Click "Cargar GeoJSON" to import geographic security data
+   - Click "Cargar GeoJSON" to import geographic safety data
    - Supported features: Points, LineStrings, and Polygons
 
-4. **View Security Levels**:
-   - Hover over sectors to see security level details
-   - Color coding indicates security levels (red=dangerous, yellow=neutral, green=safe)
+4. **View Safety Levels**:
+   - Hover over sectors to see safety level details
+   - Color coding indicates safety levels (red=dangerous, yellow=neutral, green=safe)
 
 5. **Navigate the Map**:
    - Pan and zoom the map to analyze different locations
@@ -59,7 +59,7 @@ No build process is required as this is a client-side JavaScript application.
 ## Technical Details
 
 - **Mapping Library**: [Leaflet](https://leafletjs.com/)
-- **GeoJSON Processing**: Custom implementation for extracting security data
+- **GeoJSON Processing**: Custom implementation for extracting safety data
 - **Spatial Calculations**: Custom algorithms for angle, distance, and sector analysis
 - **Browser Support**: Modern browsers with ES6 support
 
@@ -82,8 +82,8 @@ security-radar-visualization/
 - Mobile application integration with magnetometer and GPS
 - Backend integration with PostgreSQL + PostGIS for scalable data storage
 - Multi-user support with saved profiles and locations
-- Time-based security analysis to show changes over time
-- Integration with real-time security data sources
+- Time-based safety analysis to show changes over time
+- Integration with real-time safety data sources
 - Migration to React/Next.js for enhanced UI capabilities
 - Creating a comprehensive backend service using Supabase
 
@@ -109,4 +109,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-*Note: This project is a prototype and is intended for demonstration purposes. Security assessments should be verified through official sources.*
+*Note: This project is a prototype and is intended for demonstration purposes. Safety assessments should be verified through official sources.*

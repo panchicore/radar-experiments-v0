@@ -6,7 +6,7 @@ A dynamic, interactive safety and security radar visualization tool that display
 
 ## Motivation of this poc
 
-[DALL-E-2025-03-02-10-38-29-A-first-person-perspective-POV-from-a-high-tech-scouter-helmet-in-a-f.webp](https://postimg.cc/pmRStMCM)
+![AR Safety Radar Concept](https://i.postimg.cc/kGsTZ8nZ/DALL-E-2025-03-02-10-38-29-A-first-person-perspective-POV-from-a-high-tech-scouter-helmet-in-a-f.webp)
 
 - This project was created with the help of the AI as a proof of concept to show the potential of the technology with augmented reality.
     - The assumption is that the radar is implemented everywhere, like on a scouter helmet and the user can see the safety and security levels around him as an overlay on the sky, in form of aurora borealis.

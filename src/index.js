@@ -22,12 +22,13 @@ let poisVisible = true; // Estado de visibilidad de los POIs
 let distanceLabels = []; // Para almacenar referencias a las etiquetas de distancia
 let followingMapCenter = true; // Nueva variable para controlar si el radar sigue el centro del mapa
 let centerCircleMarker = null; // New variable for circle marker
+let radarVisible = true; // Nueva variable para controlar la visibilidad del radar
 
 // Configuración inicial
 const config = {
   centerCoords: [10.99654, -74.81899], // [lat, lng] para Leaflet
   centerCoordsGeoJSON: [-74.81899, 10.99654], // [lng, lat] para GeoJSON
-  radiusMeters: 2000,
+  radiusMeters: 20000,
   numSectors: 36
 };
 
@@ -47,7 +48,17 @@ const samplePOIs = [
     coords: [11.00154, -74.82899],
     level: 5,
     description: "Zona neutra - Noroeste (153.4°)"
-  }
+  },
+  {
+    coords: [10.98223, -74.83372],
+    level: 10,
+    description: "Zona segura cerca de zona peligrosa"
+  },
+  {
+    coords: [11.01972, -74.86814],
+    level: 1,
+    description: "Zona peligrosa"
+  },
 ];
 
 // Función para calcular el ángulo en grados
@@ -474,7 +485,7 @@ function updateGeoJSONDistanceLabels() {
 
 // Generar color según nivel (1-10)
 function getLevelColor(level) {
-  if (level === null) return 'rgba(128, 128, 128, 0.5)'; // Sin datos - gris semitransparente
+  if (level === null) return 'rgba(128, 128, 128, 1.0)'; // Sin datos - gris completamente opaco
 
   // Asegurarnos que el nivel esté en el rango correcto
   const safeLevel = Math.max(1, Math.min(10, Math.round(level)));
@@ -600,7 +611,12 @@ function createRadarVisualization() {
     color: '#333',
     weight: 0,
     fill: false
-  }).addTo(map);
+  });
+  
+  // Solo añadir al mapa si el radar es visible
+  if (radarVisible) {
+    radarLayer.addTo(map);
+  }
 
   // Debug información
   console.log("=== VERIFICACIÓN DE ÁNGULOS ===");
@@ -648,11 +664,17 @@ function createRadarVisualization() {
 
     // Crear polígono del sector
     const sectorLayer = L.polygon(sectorPoints, {
-      color: '#666',
-      weight: 0.5,
+      color: '#696969',
+      weight: 0.8,  // Slightly thicker lines for better visibility of dashes
+      dashArray: '3,3',
       fillColor: sectorColor,
-      fillOpacity: 0.5
-    }).addTo(map);
+      fillOpacity: sectors[i].level === null ? 0.0 : 0.5
+    });
+    
+    // Solo añadir al mapa si el radar es visible
+    if (radarVisible) {
+      sectorLayer.addTo(map);
+    }
 
     // Agregar popup con información
     let popupContent = `<strong>Sector ${i} (${startAngle.toFixed(1)}° - ${endAngle.toFixed(1)}°)</strong><br>`;
@@ -677,23 +699,35 @@ function createRadarVisualization() {
     const endPoint = destinationPoint(centerLatLng, radiusMeters, angle);
 
     // Crear línea desde el centro hasta el borde
-    L.polyline([centerLatLng, endPoint], {
+    const radialLine = L.polyline([centerLatLng, endPoint], {
       color: '#888',
       weight: 0.5,
       opacity: 0.5,
       dashArray: '3,5'
-    }).addTo(map);
+    });
+    
+    // Solo añadir al mapa si el radar es visible
+    if (radarVisible) {
+      radialLine.addTo(map);
+      sectorLayers.push(radialLine); // Guardar también las líneas radiales para poder ocultarlas
+    }
   }
 
   // Agregar marcador central de referencia
-  L.marker(centerLatLng, {
+  const centerReferenceMarker = L.marker(centerLatLng, {
     icon: L.divIcon({
       className: 'center-marker',
       html: '<div style="width:8px;height:8px;border-radius:4px;background-color:#fff;border:2px solid #333;"></div>',
       iconSize: [12, 12],
       iconAnchor: [6, 6]
     })
-  }).addTo(map);
+  });
+  
+  // Solo añadir al mapa si el radar es visible
+  if (radarVisible) {
+    centerReferenceMarker.addTo(map);
+    sectorLayers.push(centerReferenceMarker); // Guardar también el marcador central
+  }
 
   // Asegurar orden correcto de capas
   if (geojsonLayer) {
@@ -718,8 +752,8 @@ function updateRadar() {
     console.log(`Radar actualizado: Radio = ${config.radiusMeters}m, Sectores = ${config.numSectors}`);
   }
   
-  // Actualizar visualización
-  createRadarVisualization();
+ // Actualizar visualización
+ createRadarVisualization();
   
   // Actualizar etiquetas de distancia cada vez que se actualiza el radar
   updateDistanceLabels();
@@ -730,21 +764,79 @@ function updateRadar() {
   }
 }
 
-// Función para agregar un nuevo punto de interés
+// Función para alternar la visibilidad del radar
+function toggleRadarVisibility() {
+  radarVisible = !radarVisible;
+  
+  // Alternar visibilidad de la capa principal del radar
+  if (radarLayer) {
+    if (radarVisible) {
+      radarLayer.addTo(map);
+    } else {
+      map.removeLayer(radarLayer);
+    }
+  }
+  
+  // Alternar visibilidad de los sectores
+  sectorLayers.forEach(layer => {
+    if (layer) {
+      if (radarVisible) {
+        layer.addTo(map);
+      } else {
+        map.removeLayer(layer);
+      }
+    }
+  });
+  
+  // Actualizar texto del botón
+  const toggleButton = document.getElementById('toggle-radar-btn');
+  if (toggleButton) {
+    toggleButton.textContent = radarVisible ? 'Ocultar Radar' : 'Mostrar Radar';
+    toggleButton.title = radarVisible ? 'Ocultar capas del radar' : 'Mostrar capas del radar';
+  }
+  
+  // Mostrar notificación
+  showNotification(radarVisible ? "Radar visible" : "Radar oculto");
+}
+
+// Modificar la función para agregar un nuevo punto de interés para ocultar temporalmente el radar
 function addNewPOI() {
+  // Si el radar está visible, ocultarlo temporalmente para facilitar la selección
+  const wasRadarVisible = radarVisible;
+  if (radarVisible) {
+    toggleRadarVisibility(); // Ocultar radar
+    showNotification("Radar oculto temporalmente para permitir la selección del punto");
+  }
+  
   map.once('click', function(e) {
     // Mostrar formulario popup para nivel y descripción
     const level = prompt("Nivel de seguridad (1-10):", "5");
-    if (level === null) return;
+    if (level === null) {
+      // Si el usuario cancela, restaurar el radar si estaba visible originalmente
+      if (wasRadarVisible && !radarVisible) {
+        toggleRadarVisibility();
+      }
+      return;
+    }
 
     const levelNum = parseInt(level);
     if (isNaN(levelNum) || levelNum < 1 || levelNum > 10) {
       alert("Por favor, introduce un nivel válido entre 1 y 10.");
+      // Si hay error, restaurar el radar si estaba visible originalmente
+      if (wasRadarVisible && !radarVisible) {
+        toggleRadarVisibility();
+      }
       return;
     }
 
     const description = prompt("Descripción:", "Nuevo punto de interés");
-    if (description === null) return;
+    if (description === null) {
+      // Si el usuario cancela, restaurar el radar si estaba visible originalmente
+      if (wasRadarVisible && !radarVisible) {
+        toggleRadarVisibility();
+      }
+      return;
+    }
 
     // Crear objeto POI
     const newPoi = {
@@ -755,6 +847,11 @@ function addNewPOI() {
 
     // Agregar POI al mapa
     addPOI(newPoi);
+
+    // Restaurar el radar si estaba visible originalmente
+    if (wasRadarVisible && !radarVisible) {
+      toggleRadarVisibility();
+    }
 
     // Actualizar radar
     updateRadar();
@@ -1187,6 +1284,13 @@ function initApp() {
     document.getElementById('toggle-pois-btn').addEventListener('click', togglePOIsVisibility);
   } else {
     console.warn("No se encontró el botón toggle-pois-btn en el DOM");
+  }
+  
+  // Añadir event listener para el toggle del radar
+  if (document.getElementById('toggle-radar-btn')) {
+    document.getElementById('toggle-radar-btn').addEventListener('click', toggleRadarVisibility);
+  } else {
+    console.warn("No se encontró el botón toggle-radar-btn en el DOM");
   }
 
   // Actualizaciones automáticas al cambiar inputs

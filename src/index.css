@@ -94,3 +94,19 @@ body {
 .filled-sector {
     /* Additional styling for filled sectors */
 }
+
+.geojson-tools {
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.geojson-tools a {
+    color: #0078ff;
+    text-decoration: none;
+    display: inline-block;
+    padding: 5px 0;
+}
+
+.geojson-tools a:hover {
+    text-decoration: underline;
+}

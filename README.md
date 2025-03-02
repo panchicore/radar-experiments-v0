@@ -4,6 +4,16 @@ A dynamic, interactive safety and security radar visualization tool that display
 
 ![Safety & Security Radar Demo](https://i.ibb.co/mGQtWxm/security-radar-demo.png)
 
+## Motivation of this poc
+
+[DALL-E-2025-03-02-10-38-29-A-first-person-perspective-POV-from-a-high-tech-scouter-helmet-in-a-f.webp](https://postimg.cc/pmRStMCM)
+
+- This project was created with the help of the AI as a proof of concept to show the potential of the technology with augmented reality.
+    - The assumption is that the radar is implemented everywhere, like on a scouter helmet and the user can see the safety and security levels around him as an overlay on the sky, in form of aurora borealis.
+- The implementation focus on safety and security levels, but it can be extended to other types of data like finding objects or people placed on the map.
+- This is an alternative to the traditional turn-by-turn navigation systems that are currently used in the present.
+- A privacy-focused navigation system that guides users with distance-based directional cues using a color-coded radar —green to move forward, red to stop, and yellow to adjust— without revealing the exact destination.
+
 ## Features
 
 - **Interactive Radar Visualization**: View safety and security levels in different directions around a central point
@@ -82,20 +92,14 @@ security-radar-visualization/
 - Mobile application integration with magnetometer and GPS
 - Backend integration with PostgreSQL + PostGIS for scalable data storage
 - Multi-user support with saved profiles and locations
-- Time-based safety analysis to show changes over time
 - Integration with real-time safety data sources
-- Migration to React/Next.js for enhanced UI capabilities
-- Creating a comprehensive backend service using Supabase
+- Migration to Kotlin to create native apps
+- Creating a comprehensive backend service using Supabase + PostGIS
+- Time-based safety analysis to show changes over time
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+Contributions are welcome! Please feel free to submit Issues or Pull Request.
 
 ## License
 
